@@ -1,8 +1,6 @@
-﻿using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+using Mikabrytu.HanoiTower.Events;
 using Mikabrytu.HanoiTower.Systems;
 
 namespace Mikabrytu.HanoiTower.Components
@@ -18,7 +16,7 @@ namespace Mikabrytu.HanoiTower.Components
         private Rigidbody2D rigidbody;
 
         private Vector3 pinPosition;
-        private Vector3 previousPosition;
+        private bool isMoving = false;
         private bool stuckOnPin = false;
 
         private void Start()
@@ -33,6 +31,9 @@ namespace Mikabrytu.HanoiTower.Components
         {
             if (inputSystem.IsTouching())
             {
+                if (!isMoving)
+                    EventManager.Raise(new OnRingMoveEvent(transform));
+
                 ChangePhysics(true);
 
                 if (stuckOnPin)
@@ -41,8 +42,13 @@ namespace Mikabrytu.HanoiTower.Components
                     moveSystem.Move(inputSystem.GetTouchPosition());
             } else
             {
+                if (isMoving)
+                    EventManager.Raise(new OnRingDropEvent());
+
                 ChangePhysics(false);
             }
+
+            isMoving = inputSystem.IsTouching();
         }
 
         private void OnTriggerEnter2D(Collider2D collision)
