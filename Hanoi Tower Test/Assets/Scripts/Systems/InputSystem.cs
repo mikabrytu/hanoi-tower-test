@@ -7,13 +7,13 @@ namespace Mikabrytu.HanoiTower.Systems
         private enum Platform { Editor, Mobile }
 
         private Transform transform;
-        private Camera camera;
 
         private Platform platform;
+        private Vector3 previousPosition;
         private Vector2 currentPosition;
         private bool isTouching = false;
 
-        public InputSystem(Transform transform, Camera camera) {
+        public InputSystem(Transform transform) {
 
 #if UNITY_EDITOR
             platform = Platform.Editor;
@@ -24,9 +24,13 @@ namespace Mikabrytu.HanoiTower.Systems
 #endif
 
             this.transform = transform;
-            this.camera = camera;
 
             currentPosition = Vector2.zero;
+        }
+
+        public Vector3 GetPreviousPosition()
+        {
+            return previousPosition;
         }
 
         public Vector2 GetTouchPosition()
@@ -46,6 +50,8 @@ namespace Mikabrytu.HanoiTower.Systems
         {
             if (Input.GetMouseButtonDown(0))
             {
+                previousPosition = transform.position;
+
                 Vector3 touch = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 Vector2 touch2D = new Vector2(touch.x, touch.y);
 

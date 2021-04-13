@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +9,8 @@ namespace Mikabrytu.HanoiTower.Components
 {
     public class RingComponent : MonoBehaviour
     {
-        [Header("Pin Properties")]
+        public int Size;
+
         [SerializeField] private string _pinTag;
 
         private InputSystem inputSystem;
@@ -16,11 +18,12 @@ namespace Mikabrytu.HanoiTower.Components
         private Rigidbody2D rigidbody;
 
         private Vector3 pinPosition;
+        private Vector3 previousPosition;
         private bool stuckOnPin = false;
 
         private void Start()
         {
-            inputSystem = new InputSystem(transform, Camera.main);
+            inputSystem = new InputSystem(transform);
             moveSystem = new MoveSystem(transform, Camera.main);
 
             rigidbody = GetComponent<Rigidbody2D>();
@@ -30,7 +33,7 @@ namespace Mikabrytu.HanoiTower.Components
         {
             if (inputSystem.IsTouching())
             {
-                rigidbody.isKinematic = true;
+                ChangePhysics(true);
 
                 if (stuckOnPin)
                     moveSystem.Move(inputSystem.GetTouchPosition(), Vector3.right, pinPosition);
@@ -38,7 +41,7 @@ namespace Mikabrytu.HanoiTower.Components
                     moveSystem.Move(inputSystem.GetTouchPosition());
             } else
             {
-                rigidbody.isKinematic = false;
+                ChangePhysics(false);
             }
         }
 
@@ -55,6 +58,11 @@ namespace Mikabrytu.HanoiTower.Components
         {
             if (collision.tag.Equals(_pinTag))
                 stuckOnPin = false;
+        }
+
+        private void ChangePhysics(bool isKinematic)
+        {
+            rigidbody.isKinematic = isKinematic;
         }
     }
 }
