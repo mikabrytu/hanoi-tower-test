@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using UnityEngine;
+using DG.Tweening;
 
 using Mikabrytu.HanoiTower.Events;
 using Mikabrytu.HanoiTower.Systems;
@@ -12,6 +13,7 @@ namespace Mikabrytu.HanoiTower.Components
 
         [SerializeField] Transform[] _boundaries;
         [SerializeField] private string _pinTag;
+        [SerializeField] private Vector2[] _impulseDirections;
         [SerializeField] private float _impulse;
 
         private InputSystem inputSystem;
@@ -21,6 +23,8 @@ namespace Mikabrytu.HanoiTower.Components
         private Vector3 pinPosition;
         private bool isMoving = false;
         private bool stuckOnPin = false;
+
+        #region Unity LifeCycle
 
         private void Start()
         {
@@ -42,7 +46,7 @@ namespace Mikabrytu.HanoiTower.Components
             if (inputSystem.IsTouching())
             {
                 if (!isMoving)
-                    EventManager.Raise(new OnRingMoveEvent(transform));
+                    TouchReaction();
 
                 ChangePhysics(true);
 
@@ -55,26 +59,7 @@ namespace Mikabrytu.HanoiTower.Components
                 ChangePhysics(false);
 
                 if (isMoving)
-                {
-                    EventManager.Raise(new OnRingDropEvent());
-
-                    if (stuckOnPin)
-                    {
-                        RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, Vector2.down, 5);
-                        hits = hits.OrderBy(col => col.distance).ToArray();
-
-                        if (hits.Length > 2)
-                        {
-                            RingComponent other = hits[2].transform.GetComponent<RingComponent>();
-
-                            if (other != null && other.Size < Size)
-                            {
-                                float x = Random.Range(-1f, 1f);
-                                rigidbody.AddForce(new Vector2(x, 1) * _impulse);
-                            }
-                        }
-                    }
-                }
+                    DropRaction();
             }
 
             isMoving = inputSystem.IsTouching();
@@ -92,14 +77,45 @@ namespace Mikabrytu.HanoiTower.Components
         private void OnTriggerExit2D(Collider2D collision)
         {
             if (collision.tag.Equals(_pinTag))
-            {
                 stuckOnPin = false;
-            }
         }
+
+        #endregion
 
         private void ChangePhysics(bool isKinematic)
         {
             rigidbody.isKinematic = isKinematic;
+        }
+
+        private void TouchReaction()
+        {
+            EventManager.Raise(new OnRingMoveEvent(transform));
+            transform.DORotate(Vector3.zero, .2f);
+        }
+
+        private void DropRaction()
+        {
+            EventManager.Raise(new OnRingDropEvent());
+
+            if (stuckOnPin)
+                ImpulseInvalidPlacement();
+        }
+
+        private void ImpulseInvalidPlacement()
+        {
+            RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, Vector2.down, 5);
+            hits = hits.OrderBy(col => col.distance).ToArray();
+
+            if (hits.Length > 2)
+            {
+                RingComponent other = hits[2].transform.GetComponent<RingComponent>();
+
+                if (other != null && other.Size < Size)
+                {
+                    int index = Random.Range(0, _impulseDirections.Length);
+                    rigidbody.AddForce(_impulseDirections[index] * _impulse);
+                }
+            }
         }
     }
 }

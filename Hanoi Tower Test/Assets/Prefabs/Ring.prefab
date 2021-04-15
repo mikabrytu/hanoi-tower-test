@@ -132,7 +132,11 @@ MonoBehaviour:
   Size: 0
   _boundaries: []
   _pinTag: Pin
-  _impulse: 1500
+  _pinSideTag: Pin Side
+  _impulseDirections:
+  - {x: -1, y: 1}
+  - {x: 1, y: 1}
+  _impulse: 2000
 --- !u!61 &1405567727018010974
 BoxCollider2D:
   m_ObjectHideFlags: 0
