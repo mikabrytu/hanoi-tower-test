@@ -6,6 +6,6 @@ PhysicsMaterial2D:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Ring
+  m_Name: Wood
   friction: 0.8
-  bounciness: 0.2
+  bounciness: 0.25

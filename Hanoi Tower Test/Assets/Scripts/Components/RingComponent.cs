@@ -57,13 +57,17 @@ namespace Mikabrytu.HanoiTower.Components
             {
                 stuckOnPin = true;
                 pinPosition = collision.transform.position;
+                //rigidbody.constraints = RigidbodyConstraints2D.FreezePositionX;
             }
         }
 
         private void OnTriggerExit2D(Collider2D collision)
         {
             if (collision.tag.Equals(_pinTag))
+            {
                 stuckOnPin = false;
+                //rigidbody.constraints = RigidbodyConstraints2D.None;
+            }
         }
 
         private void ChangePhysics(bool isKinematic)
