@@ -11,18 +11,26 @@ namespace Mikabrytu.HanoiTower.Components
     {
         public int Size;
 
-        [SerializeField] Transform[] _boundaries;
+        [Header("Tags")]
         [SerializeField] private string _pinTag;
+        [SerializeField] private string _groundTag;
+
+        [Header("Impulse Properties")]
         [SerializeField] private Vector2[] _impulseDirections;
         [SerializeField] private float _impulse;
+
+        [Header("General Properties")]
+        [SerializeField] Transform[] _boundaries;
 
         private InputSystem inputSystem;
         private MoveSystem moveSystem;
         private Rigidbody2D rigidbody;
+        private Animator animator;
 
         private Vector3 pinPosition;
         private bool isMoving = false;
         private bool stuckOnPin = false;
+        private bool isGrounded = true;
 
         #region Unity LifeCycle
 
@@ -39,6 +47,7 @@ namespace Mikabrytu.HanoiTower.Components
             });
 
             rigidbody = GetComponent<Rigidbody2D>();
+            animator = GetComponent<Animator>();
         }
 
         private void Update()
@@ -80,6 +89,15 @@ namespace Mikabrytu.HanoiTower.Components
                 stuckOnPin = false;
         }
 
+        private void OnCollisionEnter2D(Collision2D collision)
+        {
+            if ((collision.transform.tag.Equals(_groundTag) || collision.transform.tag.Equals(tag)) && !isGrounded)
+            {
+                animator.SetTrigger("Fall");
+                isGrounded = true;
+            }
+        }
+
         #endregion
 
         private void ChangePhysics(bool isKinematic)
@@ -90,7 +108,9 @@ namespace Mikabrytu.HanoiTower.Components
         private void TouchReaction()
         {
             EventManager.Raise(new OnRingMoveEvent(transform));
+            animator.SetTrigger("Touch");
             transform.DORotate(Vector3.zero, .2f);
+            isGrounded = false;
         }
 
         private void DropRaction()

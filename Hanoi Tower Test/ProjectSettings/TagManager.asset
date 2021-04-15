@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Pin
   - Pin Side
+  - Ground
   layers:
   - Default
   - TransparentFX
