@@ -22,6 +22,9 @@ namespace Mikabrytu.HanoiTower.Components
         [Header("General Properties")]
         [SerializeField] Transform[] _boundaries;
 
+        [Header("Partiles")]
+        [SerializeField] private ParticleSystem _fallParticle;
+
         private InputSystem inputSystem;
         private MoveSystem moveSystem;
         private Rigidbody2D rigidbody;
@@ -92,10 +95,7 @@ namespace Mikabrytu.HanoiTower.Components
         private void OnCollisionEnter2D(Collision2D collision)
         {
             if ((collision.transform.tag.Equals(_groundTag) || collision.transform.tag.Equals(tag)) && !isGrounded)
-            {
-                animator.SetTrigger("Fall");
-                isGrounded = true;
-            }
+                Fall();
         }
 
         #endregion
@@ -119,6 +119,13 @@ namespace Mikabrytu.HanoiTower.Components
 
             if (stuckOnPin)
                 ImpulseInvalidPlacement();
+        }
+
+        private void Fall()
+        {
+            animator.SetTrigger("Fall");
+            _fallParticle.Play();
+            isGrounded = true;
         }
 
         private void ImpulseInvalidPlacement()
