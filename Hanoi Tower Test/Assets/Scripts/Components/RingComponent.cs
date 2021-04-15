@@ -10,6 +10,7 @@ namespace Mikabrytu.HanoiTower.Components
         public int Size;
 
         [SerializeField] private string _pinTag;
+        [SerializeField] Transform[] _boundaries;
 
         private InputSystem inputSystem;
         private MoveSystem moveSystem;
@@ -23,6 +24,13 @@ namespace Mikabrytu.HanoiTower.Components
         {
             inputSystem = new InputSystem(transform);
             moveSystem = new MoveSystem(transform, Camera.main);
+
+            moveSystem.SetBoundaries(new float[] {
+                _boundaries[0].position.y,
+                _boundaries[1].position.x,
+                _boundaries[2].position.y,
+                _boundaries[3].position.x
+            });
 
             rigidbody = GetComponent<Rigidbody2D>();
         }

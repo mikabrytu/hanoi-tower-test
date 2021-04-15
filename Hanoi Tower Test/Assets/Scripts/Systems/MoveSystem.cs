@@ -6,11 +6,17 @@ namespace Mikabrytu.HanoiTower.Systems
     {
         private Transform transform;
         private Camera camera;
+        private float[] boundaries;
 
         public MoveSystem(Transform transform, Camera camera)
         {
             this.transform = transform;
             this.camera = camera;
+        }
+
+        public void SetBoundaries(float[] boundaries)
+        {
+            this.boundaries = boundaries;
         }
 
         public void Move(Vector3 position, Vector3 fixedAxis, Vector3 fixedPosition)
@@ -32,7 +38,25 @@ namespace Mikabrytu.HanoiTower.Systems
         public void Move(Vector3 position)
         {
             position = CastScreenToWorld(position);
-            transform.position = position;
+
+            bool valid = true;
+            if (boundaries.Length > 0)
+            {
+                if (position.y > boundaries[0])
+                    valid = false;
+
+                if (position.y < boundaries[2])
+                    valid = false;
+
+                if (position.x > boundaries[1])
+                    valid = false;
+
+                if (position.x < boundaries[3])
+                    valid = false;
+            }
+
+            if (valid)
+                transform.position = position;
         }
 
         private Vector3 CastScreenToWorld(Vector3 position)
@@ -41,6 +65,11 @@ namespace Mikabrytu.HanoiTower.Systems
             position.z = 0;
 
             return position;
+        }
+
+        private void CheckBoundaries(Vector3 position)
+        {
+
         }
     }
 }
