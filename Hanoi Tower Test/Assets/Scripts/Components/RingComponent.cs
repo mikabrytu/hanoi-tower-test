@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 using Mikabrytu.HanoiTower.Events;
 using Mikabrytu.HanoiTower.Systems;
@@ -9,8 +10,9 @@ namespace Mikabrytu.HanoiTower.Components
     {
         public int Size;
 
-        [SerializeField] private string _pinTag;
         [SerializeField] Transform[] _boundaries;
+        [SerializeField] private string _pinTag;
+        [SerializeField] private float _impulse;
 
         private InputSystem inputSystem;
         private MoveSystem moveSystem;
@@ -50,10 +52,29 @@ namespace Mikabrytu.HanoiTower.Components
                     moveSystem.Move(inputSystem.GetTouchPosition());
             } else
             {
+                ChangePhysics(false);
+
                 if (isMoving)
+                {
                     EventManager.Raise(new OnRingDropEvent());
 
-                ChangePhysics(false);
+                    if (stuckOnPin)
+                    {
+                        RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, Vector2.down, 5);
+                        hits = hits.OrderBy(col => col.distance).ToArray();
+
+                        if (hits.Length > 2)
+                        {
+                            RingComponent other = hits[2].transform.GetComponent<RingComponent>();
+
+                            if (other != null && other.Size < Size)
+                            {
+                                float x = Random.Range(-1f, 1f);
+                                rigidbody.AddForce(new Vector2(x, 1) * _impulse);
+                            }
+                        }
+                    }
+                }
             }
 
             isMoving = inputSystem.IsTouching();
@@ -65,7 +86,6 @@ namespace Mikabrytu.HanoiTower.Components
             {
                 stuckOnPin = true;
                 pinPosition = collision.transform.position;
-                //rigidbody.constraints = RigidbodyConstraints2D.FreezePositionX;
             }
         }
 
@@ -74,7 +94,6 @@ namespace Mikabrytu.HanoiTower.Components
             if (collision.tag.Equals(_pinTag))
             {
                 stuckOnPin = false;
-                //rigidbody.constraints = RigidbodyConstraints2D.None;
             }
         }
 
