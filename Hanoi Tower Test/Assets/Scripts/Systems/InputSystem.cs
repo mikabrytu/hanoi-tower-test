@@ -9,7 +9,6 @@ namespace Mikabrytu.HanoiTower.Systems
         private Transform transform;
 
         private Platform platform;
-        private Vector3 previousPosition;
         private Vector2 currentPosition;
         private bool isTouching = false;
 
@@ -26,11 +25,6 @@ namespace Mikabrytu.HanoiTower.Systems
             this.transform = transform;
 
             currentPosition = Vector2.zero;
-        }
-
-        public Vector3 GetPreviousPosition()
-        {
-            return previousPosition;
         }
 
         public Vector2 GetTouchPosition()
@@ -50,8 +44,6 @@ namespace Mikabrytu.HanoiTower.Systems
         {
             if (Input.GetMouseButtonDown(0))
             {
-                previousPosition = transform.position;
-
                 Vector3 touch = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 Vector2 touch2D = new Vector2(touch.x, touch.y);
 
@@ -61,9 +53,7 @@ namespace Mikabrytu.HanoiTower.Systems
             }
 
             if (Input.GetMouseButtonUp(0))
-            {
                 isTouching = false;
-            }
 
             return isTouching;
         }
@@ -71,9 +61,7 @@ namespace Mikabrytu.HanoiTower.Systems
         private Vector2 DesktopInput()
         {
             if (isTouching)
-            {
                 currentPosition = Input.mousePosition;
-            }
 
             return currentPosition;
         }
