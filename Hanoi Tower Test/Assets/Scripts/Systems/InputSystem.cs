@@ -42,21 +42,16 @@ namespace Mikabrytu.HanoiTower.Systems
 
         public bool IsTouching()
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                Vector3 touch = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                Vector2 touch2D = new Vector2(touch.x, touch.y);
+            if (platform == Platform.Editor)
+                DesktopIsTouching();
 
-                RaycastHit2D hit = Physics2D.Raycast(touch2D, Vector2.zero);
-                if (hit.collider != null && hit.transform.name.Equals(transform.name))
-                    isTouching = true;
-            }
-
-            if (Input.GetMouseButtonUp(0))
-                isTouching = false;
+            if (platform == Platform.Mobile)
+                MobileIsTouching();
 
             return isTouching;
         }
+
+        #region Desktop Logic
 
         private Vector2 DesktopInput()
         {
@@ -66,9 +61,57 @@ namespace Mikabrytu.HanoiTower.Systems
             return currentPosition;
         }
 
+        private bool DesktopIsTouching()
+        {
+            if (Input.GetMouseButtonDown(0))
+                if (CheckIfSelfIsClicked(Input.mousePosition))
+                    isTouching = true;
+
+            if (Input.GetMouseButtonUp(0))
+                isTouching = false;
+
+            return isTouching;
+        }
+
+        #endregion
+
+        #region Mobile Logic
+
         private Vector2 MobileInput()
         {
-            return Vector2.zero;
+            if (isTouching)
+                currentPosition = Input.GetTouch(0).position;
+
+            return currentPosition;
+        }
+
+        private bool MobileIsTouching()
+        {
+            if (Input.touchCount > 0)
+            {
+                if (Input.GetTouch(0).phase == TouchPhase.Began)
+                    if (CheckIfSelfIsClicked(Input.GetTouch(0).position))
+                        isTouching = true;
+
+                if (Input.GetTouch(0).phase == TouchPhase.Ended)
+                    isTouching = false;
+            }
+            else
+                isTouching = false;
+
+            return isTouching;
+        }
+
+        #endregion
+
+        private bool CheckIfSelfIsClicked(Vector3 inputPosition)
+        {
+            Vector3 touch = Camera.main.ScreenToWorldPoint(inputPosition);
+            Vector2 touch2D = new Vector2(touch.x, touch.y);
+
+            RaycastHit2D hit = Physics2D.Raycast(touch2D, Vector2.zero);
+
+            return hit.collider != null && hit.transform.name.Equals(transform.name);
         }
     }
 }
