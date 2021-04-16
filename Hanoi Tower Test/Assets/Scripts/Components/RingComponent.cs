@@ -123,6 +123,7 @@ namespace Mikabrytu.HanoiTower.Components
 
         private void Fall()
         {
+            EventManager.Raise(new OnRingFallEvent());
             animator.SetTrigger("Fall");
             _fallParticle.Play();
             isGrounded = true;
@@ -139,6 +140,8 @@ namespace Mikabrytu.HanoiTower.Components
 
                 if (other != null && other.Size < Size)
                 {
+                    EventManager.Raise(new OnRingFlyEvent());
+
                     int index = Random.Range(0, _impulseDirections.Length);
                     rigidbody.AddForce(_impulseDirections[index] * _impulse);
                 }
