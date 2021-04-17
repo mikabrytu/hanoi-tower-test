@@ -25,7 +25,7 @@ namespace Mikabrytu.HanoiTower.Components
 
         [Header("Partiles")]
         [SerializeField] private ParticleSystem fallParticle;
-        [SerializeField] private ParticleSystem flyParticles;
+        [SerializeField] private ParticleSystem flyParticle;
 
         private InputSystem inputSystem;
         private MoveSystem moveSystem;
@@ -34,7 +34,7 @@ namespace Mikabrytu.HanoiTower.Components
 
         private Vector3 pinPosition;
         private bool isMoving = false;
-        private bool stuckOnPin = false;
+        private bool isFixed = false;
         private bool isGrounded = true;
         private bool isFlying = false;
 
@@ -65,7 +65,7 @@ namespace Mikabrytu.HanoiTower.Components
 
                 ChangePhysics(true);
 
-                if (stuckOnPin)
+                if (isFixed)
                     moveSystem.Move(inputSystem.GetTouchPosition(), Vector3.right, pinPosition);
                 else
                     moveSystem.Move(inputSystem.GetTouchPosition());
@@ -74,11 +74,11 @@ namespace Mikabrytu.HanoiTower.Components
                 ChangePhysics(false);
 
                 if (rigidbody.velocity != Vector2.zero)
-                    if (stuckOnPin && !isGrounded && !isFlying)
-                        SnapOnPin();
+                    if (isFixed && !isGrounded && !isFlying)
+                        Snap();
 
                 if (isMoving)
-                    DropRaction();
+                    DropReaction();
             }
 
             isMoving = inputSystem.IsTouching();
@@ -88,7 +88,7 @@ namespace Mikabrytu.HanoiTower.Components
         {
             if (collision.tag.Equals(pinTag))
             {
-                stuckOnPin = true;
+                isFixed = true;
                 pinPosition = collision.transform.position;
             }
         }
@@ -96,7 +96,7 @@ namespace Mikabrytu.HanoiTower.Components
         private void OnTriggerExit2D(Collider2D collision)
         {
             if (collision.tag.Equals(pinTag))
-                stuckOnPin = false;
+                isFixed = false;
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
@@ -115,7 +115,7 @@ namespace Mikabrytu.HanoiTower.Components
                 rigidbody.constraints = RigidbodyConstraints2D.None;
         }
 
-        private void SnapOnPin()
+        private void Snap()
         {
             Vector2 position = pinPosition;
             position.y = rigidbody.position.y;
@@ -134,11 +134,11 @@ namespace Mikabrytu.HanoiTower.Components
             isGrounded = false;
         }
 
-        private void DropRaction()
+        private void DropReaction()
         {
             EventManager.Raise(new OnRingDropEvent());
 
-            if (stuckOnPin)
+            if (isFixed)
                 ImpulseInvalidPlacement();
             else
                 moveSystem.ApplyMomentum(inputSystem.GetTouchPosition(), momentumForce);
@@ -171,7 +171,7 @@ namespace Mikabrytu.HanoiTower.Components
                     int index = Random.Range(0, impulseDirections.Length);
                     rigidbody.AddForce(impulseDirections[index] * impulse);
                     animator.SetTrigger("Fly");
-                    flyParticles.Play();
+                    flyParticle.Play();
                 }
             }
         }

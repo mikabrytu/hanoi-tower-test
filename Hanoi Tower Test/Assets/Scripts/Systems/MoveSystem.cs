@@ -43,19 +43,7 @@ namespace Mikabrytu.HanoiTower.Systems
 
             bool valid = true;
             if (boundaries.Length > 0)
-            {
-                if (position.y > boundaries[0])
-                    valid = false;
-
-                if (position.y < boundaries[2])
-                    valid = false;
-
-                if (position.x > boundaries[1])
-                    valid = false;
-
-                if (position.x < boundaries[3])
-                    valid = false;
-            }
+                valid = position.x < boundaries[1] && position.x > boundaries[3] && position.y < boundaries[0] && position.y > boundaries[2];
 
             if (valid)
                 rigidbody.position = position;
