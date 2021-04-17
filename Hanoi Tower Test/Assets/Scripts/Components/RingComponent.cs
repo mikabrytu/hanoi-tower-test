@@ -25,6 +25,7 @@ namespace Mikabrytu.HanoiTower.Components
 
         [Header("Partiles")]
         [SerializeField] private ParticleSystem fallParticle;
+        [SerializeField] private ParticleSystem flyParticles;
 
         private InputSystem inputSystem;
         private MoveSystem moveSystem;
@@ -169,6 +170,8 @@ namespace Mikabrytu.HanoiTower.Components
 
                     int index = Random.Range(0, impulseDirections.Length);
                     rigidbody.AddForce(impulseDirections[index] * impulse);
+                    animator.SetTrigger("Fly");
+                    flyParticles.Play();
                 }
             }
         }
