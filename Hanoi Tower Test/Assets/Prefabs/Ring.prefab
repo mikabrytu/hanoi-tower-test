@@ -5002,15 +5002,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Size: 0
-  _pinTag: Pin
-  _groundTag: Ground
-  _impulseDirections:
+  pinTag: Pin
+  groundTag: Ground
+  impulseDirections:
   - {x: -1, y: 1}
   - {x: 1, y: 1}
-  _impulse: 2000
-  _boundaries: []
+  impulse: 2000
+  boundaries: []
   momentumForce: 0.2
-  _fallParticle: {fileID: 2708104110926488543}
+  fallParticle: {fileID: 0}
 --- !u!61 &1405567727018010974
 BoxCollider2D:
   m_ObjectHideFlags: 0
