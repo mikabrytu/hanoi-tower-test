@@ -4,13 +4,15 @@ namespace Mikabrytu.HanoiTower.Systems
 {
     public class MoveSystem
     {
-        private Transform transform;
+        private Rigidbody2D rigidbody;
         private Camera camera;
+        private Vector3 initialPosition;
+        private float initialTime;
         private float[] boundaries;
 
-        public MoveSystem(Transform transform, Camera camera)
+        public MoveSystem(Rigidbody2D rigidbody, Camera camera)
         {
-            this.transform = transform;
+            this.rigidbody = rigidbody;
             this.camera = camera;
         }
 
@@ -32,7 +34,7 @@ namespace Mikabrytu.HanoiTower.Systems
             if (fixedAxis.z > 0)
                 position.z = fixedPosition.z;
 
-            transform.position = position;
+            rigidbody.position = position;
         }
 
         public void Move(Vector3 position)
@@ -56,7 +58,24 @@ namespace Mikabrytu.HanoiTower.Systems
             }
 
             if (valid)
-                transform.position = position;
+                rigidbody.position = position;
+        }
+
+        public void PrepareMomentum(Vector3 position)
+        {
+            initialPosition = position;
+            initialTime = Time.time;
+        }
+
+        public void ApplyMomentum(Vector3 position, float force)
+        {
+            Vector3 finalPosition = position;
+            float finalTime = Time.time;
+
+            float interval = finalTime - initialTime;
+            Vector3 direction = initialPosition - finalPosition;
+
+            rigidbody.AddForce(-direction / interval * force);
         }
 
         private Vector3 CastScreenToWorld(Vector3 position)
@@ -65,11 +84,6 @@ namespace Mikabrytu.HanoiTower.Systems
             position.z = 0;
 
             return position;
-        }
-
-        private void CheckBoundaries(Vector3 position)
-        {
-
         }
     }
 }

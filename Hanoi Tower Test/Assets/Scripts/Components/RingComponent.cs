@@ -20,7 +20,8 @@ namespace Mikabrytu.HanoiTower.Components
         [SerializeField] private float _impulse;
 
         [Header("General Properties")]
-        [SerializeField] Transform[] _boundaries;
+        [SerializeField] private Transform[] _boundaries;
+        [SerializeField] private float momentumForce;
 
         [Header("Partiles")]
         [SerializeField] private ParticleSystem _fallParticle;
@@ -34,13 +35,17 @@ namespace Mikabrytu.HanoiTower.Components
         private bool isMoving = false;
         private bool stuckOnPin = false;
         private bool isGrounded = true;
+        private bool isFlying = false;
 
         #region Unity LifeCycle
 
         private void Start()
         {
+            rigidbody = GetComponent<Rigidbody2D>();
+            animator = GetComponent<Animator>();
+
             inputSystem = new InputSystem(transform);
-            moveSystem = new MoveSystem(transform, Camera.main);
+            moveSystem = new MoveSystem(rigidbody, Camera.main);
 
             moveSystem.SetBoundaries(new float[] {
                 _boundaries[0].position.y,
@@ -48,9 +53,6 @@ namespace Mikabrytu.HanoiTower.Components
                 _boundaries[2].position.y,
                 _boundaries[3].position.x
             });
-
-            rigidbody = GetComponent<Rigidbody2D>();
-            animator = GetComponent<Animator>();
         }
 
         private void Update()
@@ -69,6 +71,10 @@ namespace Mikabrytu.HanoiTower.Components
             } else
             {
                 ChangePhysics(false);
+
+                if (rigidbody.velocity != Vector2.zero)
+                    if (stuckOnPin && !isGrounded && !isFlying)
+                        SnapOnPin();
 
                 if (isMoving)
                     DropRaction();
@@ -103,11 +109,25 @@ namespace Mikabrytu.HanoiTower.Components
         private void ChangePhysics(bool isKinematic)
         {
             rigidbody.isKinematic = isKinematic;
+
+            if (!isKinematic && rigidbody.constraints == RigidbodyConstraints2D.FreezePositionX)
+                rigidbody.constraints = RigidbodyConstraints2D.None;
+        }
+
+        private void SnapOnPin()
+        {
+            Vector2 position = pinPosition;
+            position.y = rigidbody.position.y;
+            rigidbody.position = position;
+            rigidbody.constraints = RigidbodyConstraints2D.FreezePositionX;
         }
 
         private void TouchReaction()
         {
             EventManager.Raise(new OnRingMoveEvent(transform));
+
+            moveSystem.PrepareMomentum(inputSystem.GetTouchPosition());
+
             animator.SetTrigger("Touch");
             transform.DORotate(Vector3.zero, .2f);
             isGrounded = false;
@@ -119,6 +139,8 @@ namespace Mikabrytu.HanoiTower.Components
 
             if (stuckOnPin)
                 ImpulseInvalidPlacement();
+            else
+                moveSystem.ApplyMomentum(inputSystem.GetTouchPosition(), momentumForce);
         }
 
         private void Fall()
@@ -127,6 +149,7 @@ namespace Mikabrytu.HanoiTower.Components
             animator.SetTrigger("Fall");
             _fallParticle.Play();
             isGrounded = true;
+            isFlying = false;
         }
 
         private void ImpulseInvalidPlacement()
@@ -141,6 +164,8 @@ namespace Mikabrytu.HanoiTower.Components
                 if (other != null && other.Size < Size)
                 {
                     EventManager.Raise(new OnRingFlyEvent());
+                    ChangePhysics(false);
+                    isFlying = true;
 
                     int index = Random.Range(0, _impulseDirections.Length);
                     rigidbody.AddForce(_impulseDirections[index] * _impulse);

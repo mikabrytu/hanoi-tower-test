@@ -5009,6 +5009,7 @@ MonoBehaviour:
   - {x: 1, y: 1}
   _impulse: 2000
   _boundaries: []
+  momentumForce: 0.2
   _fallParticle: {fileID: 2708104110926488543}
 --- !u!61 &1405567727018010974
 BoxCollider2D:
